@@ -99,10 +99,30 @@ def phases_f_ev(waveform_generator,rang_fs,mass_1=30,mass_2=30,a_1=0,a_2=0,tilt_
     zeta = (phase_L - phase_R)/4.
     
     #Ratio of amplitudes
-    r = np.abs(thL/thR)
-    
+    if isinstance(thL, float):
+        if thR != 0.0:
+            r = np.abs(thL/thR)
+        else:
+            r = np.inf
+    else:
+        r = np.divide(
+            np.abs(thL), np.abs(thR),
+            out=np.full_like(np.abs(thL), np.inf),
+            where=thR != 0
+        )
+            
     #Inclination
-    a22 = (1. - r) / (1. + r)
+    if isinstance(r, float):
+        if r == np.inf:
+            a22 = -1.0
+        else:
+            a22 = (1. - r) / (1. + r)
+    else:
+        a22 = np.divide(
+            (1. - r), (1. + r),
+            out=np.full_like(r, np.inf),
+            where=r != np.inf
+        )
     
     return phase, a22, zeta, r
 
